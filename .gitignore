@@ -1,0 +1,8 @@
+# Бинарники и сборка: пакет для коллег выкладывается в Releases, не в репозиторий
+/vpnpoc
+/vpnpoc.exe
+/vpnpoc-tray
+/vpnpoc-tray.exe
+/dist/
+*.test
+.DS_Store

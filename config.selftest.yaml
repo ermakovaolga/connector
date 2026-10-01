@@ -1,0 +1,21 @@
+# Self-test без ITMO: example.com уводится агентом в direct (en0),
+# даже когда другой full-tunnel VPN держит 0/1 + 128/1.
+# Та же механика, что и для ITMO: TUN -> fake-IP DNS -> policy -> bound socket.
+tun:
+  name: utun
+  address: 198.18.0.1
+  dns_address: 198.18.0.2
+  fake_ip_range: 198.18.0.0/16
+  mtu: 1400
+
+outbounds:
+  direct:
+    interface: auto
+
+rules:
+  - domain_suffix: [example.com]
+    dns: 1.1.1.1
+    outbound: direct
+
+default: direct
+capture_ip_rules: false

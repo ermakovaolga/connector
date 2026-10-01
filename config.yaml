@@ -1,0 +1,37 @@
+# Политика снята с работающего FortiClient ITMO.
+tun:
+  name: utun                 # macOS: номер выдаст ядро; Windows: имя адаптера
+  address: 198.18.0.1
+  dns_address: 198.18.0.2    # встроенный DNS агента (внутри fake-сети)
+  fake_ip_range: 198.18.0.0/16
+  mtu: 1400
+
+outbounds:
+  itmo:
+    interface: auto          # интерфейс с самым специфичным маршрутом до detect_by
+    detect_by: 10.32.1.3     # ITMO DNS
+    scoped_default: true     # через ITMO можно слать и адреса вне его маршрутов (tatneft.guru)
+  direct:
+    interface: auto          # физический интерфейс default-маршрута (en0)
+
+rules:
+  - domain_suffix: [dgx]
+    dns: 10.32.1.3
+    outbound: itmo
+  # tatneft.guru: проверено 30.09 — через ITMO НЕ открывается (шлюз ITMO не пускает
+  # на 31.41.241.159, TCP timeout). Правило выключено, пока не выяснится, через какой VPN он работает.
+  # - domain_suffix: [tatneft.guru]
+  #   dns: [10.32.1.3, 8.8.8.8]
+  #   outbound: itmo
+  - ip_cidr: [10.32.0.3/32, 10.32.1.3/32, 10.32.2.11/32, 10.32.15.89/32]
+    outbound: itmo
+
+default: direct
+
+# Всегда через физический интерфейс: шлюз FortiClient ITMO.
+# Иначе второй (full-tunnel) VPN забирает его внешнее TLS-соединение и туннель ITMO рвётся.
+bypass: [77.234.220.42/32]
+
+# true = ещё и маршрутизировать ip_cidr из правил в TUN (обращения по IP).
+# Экспериментально: пересекается с маршрутами FortiClient.
+capture_ip_rules: false
